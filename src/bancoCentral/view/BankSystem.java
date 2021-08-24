@@ -1,21 +1,22 @@
 package bancoCentral.view;
 
+import bancoCentral.model.Bank;
 import bancoCentral.model.Database;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 public class BankSystem {
     public static void main(String[] args) {
         Database db = new Database();
 
         JSONObject test =  new JSONObject();
-        test.put("id", 1);
-        test.put("name", "ITAU");
+        test.put("id", "1");
+        test.put("name", "NUBANK");
+        test.put("costumers", new JSONArray());
 
-        JSONObject costumer = new JSONObject();
-        costumer.put("name", "Rayane");
+        db.addBank(test);
 
-        db.removeCostumer("1", costumer);
-        JSONObject json = db.findBank(test);
-        System.out.println(json.toJSONString());
+        Bank bankTest = new Bank("NUBANK", "1");
+        bankTest.addCostumer("Henry Medeiros", "henrymedeiros@hotmail.com", "hhsyehbd637", "84996620235", "henrymedeiros@hotmail.com", "241546541", "rua epaminhondas macaxeira", "128", "Campina Grande", "Paríba");
     }
 }

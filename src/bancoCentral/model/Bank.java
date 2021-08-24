@@ -1,4 +1,5 @@
 package bancoCentral.model;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -7,13 +8,13 @@ public class Bank {
     private String name;
     private String id = UUID.randomUUID().toString();
     private ArrayList<Costumer> costumers = new ArrayList<Costumer>();
-
-    public Bank(String name, String id, ArrayList<Costumer> costumers) {
+    private Database db = new Database();
+    public Bank(String name, String id) {
         this.name = name;
         this.id = id;
     }
 
-    void addCostumer(
+    public void addCostumer(
             String name,
             String email,
             String password,
@@ -25,7 +26,19 @@ public class Bank {
             String city,
             String state
     ){
+        JSONObject costumerToAdd = new JSONObject();
+        costumerToAdd.put("name", name);
+        costumerToAdd.put("email", email);
+        costumerToAdd.put("password", password);
+        costumerToAdd.put("phoneNumber", phoneNumber);
+        costumerToAdd.put("pixKey", pixKey);
+        costumerToAdd.put("cep", cep);
+        costumerToAdd.put("street", street);
+        costumerToAdd.put("number", number);
+        costumerToAdd.put("city", city);
+        costumerToAdd.put("state", state);
 
+        db.addCostumer("1", costumerToAdd);
     }
     boolean removeCostumer(String cpf){
 

@@ -20,11 +20,12 @@ public class Database {
             this.db = readFile();
         }else{
             try{
+                System.out.println("TESTE");
                 f.createNewFile();
                 this.path = f.getAbsolutePath();
                 FileWriter myDB = new FileWriter(file);
                 JSONObject dbJson = new JSONObject();
-                dbJson.put("banks", new JSONArray[0]);
+                dbJson.put("banks", new JSONArray());
                 myDB.write(dbJson.toString());
                 myDB.close();
                 this.db = dbJson;
@@ -157,6 +158,7 @@ public class Database {
 
         JSONObject bank = findBank(bankSearchQuery);
         JSONArray banks = (JSONArray) this.db.get("banks");
+        banks.remove(bank);
 
         JSONArray costumers = (JSONArray) bank.get("costumers");
         costumers.add(costumerToAdd);
