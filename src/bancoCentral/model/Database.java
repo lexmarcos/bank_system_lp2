@@ -134,6 +134,23 @@ public class Database {
         writeFile(this.db);
     }
 
+    public void removeBank(JSONObject bankToRemove){
+        JSONArray banks = (JSONArray) this.db.get("banks");
+        banks.remove(bankToRemove);
+        this.db.replace("banks", banks);
+        writeFile(this.db);
+    }
+
+    public void removeBank(String bankID){
+        JSONObject bankSearchQuery = new JSONObject();
+        bankSearchQuery.put("id", bankID);
+        JSONObject bank = findBank(bankSearchQuery);
+        JSONArray banks = (JSONArray) this.db.get("banks");
+        banks.remove(bank);
+        this.db.replace("banks", banks);
+        writeFile(this.db);
+    }
+
     public void addCostumer(String bankID, JSONObject costumerToAdd){
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
@@ -143,6 +160,25 @@ public class Database {
 
         JSONArray costumers = (JSONArray) bank.get("costumers");
         costumers.add(costumerToAdd);
+        bank.replace("costumers", costumers);
+
+        banks.add(bank);
+        this.db.replace("banks", banks);
+        writeFile(this.db);
+    }
+
+    public void removeCostumer(String bankID, JSONObject costumerToRemove){
+        JSONObject bankSearchQuery = new JSONObject();
+        bankSearchQuery.put("id", bankID);
+
+        JSONObject bank = findBank(bankSearchQuery);
+        JSONArray banks = (JSONArray) this.db.get("banks");
+        banks.remove(bank);
+        JSONArray costumers = (JSONArray) bank.get("costumers");
+
+        JSONObject costumerFinded = findOne(costumerToRemove, costumers);
+
+        costumers.remove(costumerFinded);
         bank.replace("costumers", costumers);
 
         banks.add(bank);

@@ -1,1 +1,1 @@
-{"banks":[{"name":"ITAU","id":"2"},{"name":"Banco do brasil","id":"3"},{"name":"NUBANK","costumers":[{"andress":"Abreulandia","name":"Marcosuel"},{"name":"Rayane"},{"name":"Rayane"}],"id":"1"},{"name":"NUBANK","costumers":[{"andress":"Abreulandia","name":"Marcosuel"},{"name":"Rayane"},{"name":"Rayane"}],"id":"1"}]}
+{"banks":[{"name":"Banco do brasil","id":"3"},{"name":"NUBANK","costumers":[{"andress":"Abreulandia","name":"Marcosuel"}],"id":"1"}]}
