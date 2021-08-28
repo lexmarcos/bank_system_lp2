@@ -1,0 +1,5 @@
+Reutilizaćão do codigo de verificar CNPJ
+    https://www.devmedia.com.br/validando-o-cnpj-em-uma-aplicacao-java/22374
+
+Reutilizaćão do codigo de verificar CPF
+    https://www.devmedia.com.br/validando-o-cpf-em-uma-aplicacao-java/22097

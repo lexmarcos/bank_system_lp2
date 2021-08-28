@@ -15,7 +15,7 @@ public class Andress {
 
     public Response verifyCEP(String _cep){
         _cep = _cep.trim();
-        if(cep.isEmpty() || cep.isBlank() || cep.length()  != 8){
+        if(_cep.isEmpty() || _cep.isBlank() || _cep.length()  != 8){
             return new Response("CEP inválido", false);
         }
         return new Response("CEP válido", true);

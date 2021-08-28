@@ -5,13 +5,14 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Set;
 
 public class Database {
     private final static String file = "db.json";
     private String path;
-    File fileObject;
-    JSONObject db;
+    private File fileObject;
+    private JSONObject db;
 
     public Database(){
         File f = new File(file);
@@ -52,7 +53,7 @@ public class Database {
         return new JSONObject();
     }
 
-    public void writeFile(JSONObject data){
+    private void writeFile(JSONObject data){
         try{
             FileWriter writeFile = new FileWriter(this.file);
             writeFile.write(data.toJSONString());
@@ -66,30 +67,15 @@ public class Database {
 
     private JSONObject findOne(String key, JSONObject query){
         JSONArray data = (JSONArray) db.get(key);
-        Object[] dataConvert = data.toArray();
-        Set<String> allKeys = query.keySet();
-        Object[] allKeysArray = allKeys.toArray();
-        int keyMatch = 0;
-
-        for(int i = 0; i <  data.size(); i++){
-            JSONObject currentObject = (JSONObject) dataConvert[i];
-            for(int x = 0; x < allKeysArray.length; x++){
-                if(!currentObject.containsKey(allKeysArray[x])) return new JSONObject();
-                if(currentObject.get(allKeysArray[x]).hashCode() != query.get(allKeysArray[x]).hashCode()){
-                    break;
-                }
-                keyMatch++;
-            }
-            if(keyMatch != allKeysArray.length){
-                continue;
-            }
-            return currentObject;
-        }
-        return new JSONObject();
+        return getJsonObject(query, data);
     }
 
     private JSONObject findOne(JSONObject query, JSONArray ObjectToSearch){
         JSONArray data = ObjectToSearch;
+        return getJsonObject(query, data);
+    }
+
+    private JSONObject getJsonObject(JSONObject query, JSONArray data) {
         Object[] dataConvert = data.toArray();
         Set<String> allKeys = query.keySet();
         Object[] allKeysArray = allKeys.toArray();
@@ -97,9 +83,9 @@ public class Database {
 
         for(int i = 0; i <  data.size(); i++){
             JSONObject currentObject = (JSONObject) dataConvert[i];
-            for(int x = 0; x < allKeysArray.length; x++){
-                if(!currentObject.containsKey(allKeysArray[x])) return new JSONObject();
-                if(currentObject.get(allKeysArray[x]).hashCode() != query.get(allKeysArray[x]).hashCode()){
+            for (Object o : allKeysArray) {
+                if (!currentObject.containsKey(o)) return new JSONObject();
+                if (currentObject.get(o).hashCode() != query.get(o).hashCode()) {
                     break;
                 }
                 keyMatch++;
@@ -120,6 +106,12 @@ public class Database {
         return findOne("pixKeys", query);
     }
 
+    public JSONObject findAccountByNumber(String number){
+        JSONObject query = new JSONObject();
+        query.put("number", number);
+        return findOne("publicAccountInfos", query);
+    }
+
     public JSONObject findCostumerByBank(String bankID, JSONObject query){
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
@@ -135,6 +127,14 @@ public class Database {
         writeFile(this.db);
     }
 
+    public int numberOfCostumers(String bankID){
+        JSONObject query = new JSONObject();
+        query.put("id", bankID);
+        JSONObject bank = findBank(query);
+
+        return (int) bank.get("numberOfCostumers");
+    }
+
     public void removeBank(JSONObject bankToRemove){
         JSONArray banks = (JSONArray) this.db.get("banks");
         banks.remove(bankToRemove);
@@ -142,14 +142,20 @@ public class Database {
         writeFile(this.db);
     }
 
-    public void removeBank(String bankID){
+    public Response removeBank(String bankID){
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
         JSONObject bank = findBank(bankSearchQuery);
+        if(bank.isEmpty()){
+            return new Response("Não existe banco com esse ID", false);
+        }
+
         JSONArray banks = (JSONArray) this.db.get("banks");
         banks.remove(bank);
+
         this.db.replace("banks", banks);
         writeFile(this.db);
+        return new Response("Banco exclúido com sucesso", true);
     }
 
     public void addCostumer(String bankID, JSONObject costumerToAdd){
@@ -169,31 +175,81 @@ public class Database {
         writeFile(this.db);
     }
 
-    public void removeCostumer(String bankID, JSONObject costumerToRemove){
+    public Response removeCostumer(String bankID, JSONObject costumerToRemove){
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
 
         JSONObject bank = findBank(bankSearchQuery);
+        if(bank.isEmpty()){
+            return new Response("Não existe banco com esse ID", false);
+        }
+
         JSONArray banks = (JSONArray) this.db.get("banks");
         banks.remove(bank);
+
         JSONArray costumers = (JSONArray) bank.get("costumers");
-
         JSONObject costumerFinded = findOne(costumerToRemove, costumers);
-
+        if(costumerFinded.isEmpty()){
+            return new Response("Nenhum cliente encontrado", false);
+        }
         costumers.remove(costumerFinded);
-        bank.replace("costumers", costumers);
 
+        bank.replace("costumers", costumers);
         banks.add(bank);
         this.db.replace("banks", banks);
         writeFile(this.db);
+
+        return new Response("Cliente exclúido com sucesso", true);
     }
 
     public void addPixKeyPublic(JSONObject pixKeyObject){
-        JSONArray pixKeysPublic = (JSONArray) this.db.get("pixKeysPublic");
-        pixKeysPublic.add(pixKeyObject);
-        this.db.replace("pixKeysPublic", pixKeysPublic);
+        JSONArray publicAccountInfos = (JSONArray) this.db.get("publicAccountInfos");
+        publicAccountInfos.add(pixKeyObject);
+        this.db.replace("publicAccountInfos", publicAccountInfos);
         writeFile(this.db);
     }
 
+    public void removePixKeyPublic(JSONObject pixKeyToRemove){
+        JSONArray publicAccountInfos = (JSONArray) this.db.get("publicAccountInfos");
+        publicAccountInfos.remove(pixKeyToRemove);
+        this.db.replace("publicAccountInfos", publicAccountInfos);
+        writeFile(this.db);
+    }
+
+    Bank generateBankObject(JSONObject query){
+        String bankName = (String) query.get("name");
+        String bankID = (String) query.get("id");
+        Object[] costumers = (Object[]) query.get("name");
+
+        return new Bank(bankName, bankID, costumers);
+    }
+
+    Costumer generateCostumerObject(JSONObject query){
+        boolean hasCPF = query.containsKey("cpf");
+        if(hasCPF){
+            JSONObject accountObject = (JSONObject) query.get("account");
+            String accountNumber = accountObject.get("number").toString();
+            Account account = new Account(accountObject.get("id").toString(), accountNumber, accountObject.get("pixKey").toString());
+            Andress andress = new Andress(query.get("cep").toString(), query.get("street").toString(), query.get("number").toString(), query.get("state").toString());
+
+            return  new CostumerPersonal(
+                    query.get("name").toString(),
+                    query.get("email").toString(),
+                    query.get("password").toString(),
+                    query.get("cpf").toString(),account, query.get("phoneNumber").toString(), andress
+            );
+        }
+        JSONObject accountObject = (JSONObject) query.get("account");
+        String accountNumber = accountObject.get("number").toString();
+        Account account = new Account(accountObject.get("id").toString(), accountNumber, accountObject.get("pixKey").toString());
+        Andress andress = new Andress(query.get("cep").toString(), query.get("street").toString(), query.get("number").toString(), query.get("state").toString());
+
+        return  new CostumerLegal(
+                query.get("name").toString(),
+                query.get("email").toString(),
+                query.get("password").toString(),
+                query.get("cnpj").toString(),account, query.get("phoneNumber").toString(), andress
+        );
+    }
     
 }

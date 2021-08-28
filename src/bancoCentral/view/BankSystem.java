@@ -17,6 +17,6 @@ public class BankSystem {
         db.addBank(test);
 
         Bank bankTest = new Bank("NUBANK", "1");
-        bankTest.addCostumer("Henry Medeiros", "henrymedeiros@hotmail.com", "hhsyehbd637", "84996620235", "henrymedeiros@hotmail.com", "241546541", "rua epaminhondas macaxeira", "128", "Campina Grande", "Paríba");
+//        bankTest.addCostumer("Henry Medeiros", "henrymedeiros@hotmail.com", "hhsyehbd637", "09187457482","84996620235", "henrymedeiros@hotmail.com", "241546541", "rua epaminhondas macaxeira", "128", "Campina Grande", "Paríba");
     }
 }

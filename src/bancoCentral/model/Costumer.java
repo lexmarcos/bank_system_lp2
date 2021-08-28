@@ -1,6 +1,9 @@
 package bancoCentral.model;
 
+import java.util.UUID;
+
 public class Costumer {
+    private String id = UUID.randomUUID().toString();
     private String name;
     private String email;
     private String password;
