@@ -5,10 +5,12 @@ import java.util.InputMismatchException;
 public class CostumerPersonal extends Costumer{
     private String cpf;
 
+
     public CostumerPersonal(String name, String email, String password, String cpf, Account account, String phoneNumber, Andress andress) {
         super(name, email, password, phoneNumber, account, andress);
         this.cpf = cpf;
     }
+
 
     public boolean verifyCPF(String CPF){
         if (CPF.equals("00000000000") ||
@@ -54,6 +56,7 @@ public class CostumerPersonal extends Costumer{
             return(false);
         }
     }
+
 
     public String getCpf() {
         return cpf;

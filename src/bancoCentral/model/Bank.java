@@ -11,11 +11,13 @@ public class Bank {
     private int numberOfCostumers;
     private final Database db = new Database();
 
+
     public Bank(String name, String id) {
         this.name = name;
         this.id = id;
         this.numberOfCostumers = 0;
     }
+
 
     public Bank(String name, String id, Object[] costumers) {
         this.numberOfCostumers = 0;
@@ -36,9 +38,11 @@ public class Bank {
         costumers.add(costumer);
     }
 
+
     public void addCostumerLegal(Costumer costumer){
         costumers.add(costumer);
     }
+
 
     public Response addCostumerPersonal(
             String name, String email,
@@ -77,6 +81,7 @@ public class Bank {
         return new Response("Usuário adicionado com sucesso", true);
     }
 
+
     public Response addCostumerLegal(
             String name, String email,
             String password, String cnpj,
@@ -114,15 +119,18 @@ public class Bank {
         return new Response("Usuário adicionado com sucesso", true);
     }
 
+
     public Response removeCostumerByCPF(String cpf){
         JSONObject query = new JSONObject();
         query.put("cpf", cpf);
         return removeCostumer(query);
     }
 
+
     public Response removeCostumerByQuery(JSONObject query){
         return removeCostumer(query);
     }
+
 
     private Response removeCostumer(JSONObject query) {
         Response response = db.removeCostumer(this.id, query);
@@ -135,44 +143,45 @@ public class Bank {
         return response;
     }
 
+
     public Costumer findCostumer(JSONObject query){
         return db.generateCostumerObject(db.findCostumerByBank(this.id, query));
     }
 
-    public Account getAccountByNumber(String number){
-        JSONObject accountObject = db.findAccountByNumber(number);
-        if(accountObject.isEmpty()){ return new Account("NULL", "NULL", "NULL");}
 
-        Costumer costumerToReceiveTransfer = findCostumer(new JSONObject(accountObject));
-        return costumerToReceiveTransfer.getAccount();
-    };
-    public Account getAccount(String pixKey){
+    public Account getAccount(String pixOrNumber, String key){
         JSONObject pixQuery = new JSONObject();
-        pixQuery.put("pixKey", pixKey);
-        JSONObject pixKeyObject = db.findPixKeyPublic(pixQuery);
+        pixQuery.put(key, pixOrNumber);
+        JSONObject pixKeyObject = db.findPublicAccountInfos(pixQuery);
         if(pixKeyObject.isEmpty()){ return new Account("NULL", "NULL", "NULL");}
 
         Costumer costumerToReceiveTransfer = findCostumer(new JSONObject(pixQuery));
         return costumerToReceiveTransfer.getAccount();
     };
 
+
     public String getName() { return name; }
+
 
     public void setName(String name) {
         this.name = name;
     }
 
+
     public String getId() {
         return id;
     }
+
 
     public void setId(String id) {
         this.id = id;
     }
 
+
     public ArrayList<Costumer> getCostumers() {
         return costumers;
     }
+
 
     public void setCostumers(ArrayList<Costumer> costumers) {
         this.costumers = costumers;

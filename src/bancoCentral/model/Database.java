@@ -5,7 +5,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Set;
 
 public class Database {
@@ -13,6 +12,7 @@ public class Database {
     private String path;
     private File fileObject;
     private JSONObject db;
+
 
     public Database(){
         File f = new File(file);
@@ -36,6 +36,7 @@ public class Database {
         }
     }
 
+
     private JSONObject readFile(){
         JSONParser parser = new JSONParser();
         try {
@@ -53,6 +54,7 @@ public class Database {
         return new JSONObject();
     }
 
+
     private void writeFile(JSONObject data){
         try{
             FileWriter writeFile = new FileWriter(this.file);
@@ -65,15 +67,18 @@ public class Database {
         }
     }
 
+
     private JSONObject findOne(String key, JSONObject query){
         JSONArray data = (JSONArray) db.get(key);
         return getJsonObject(query, data);
     }
 
+
     private JSONObject findOne(JSONObject query, JSONArray ObjectToSearch){
         JSONArray data = ObjectToSearch;
         return getJsonObject(query, data);
     }
+
 
     private JSONObject getJsonObject(JSONObject query, JSONArray data) {
         Object[] dataConvert = data.toArray();
@@ -98,19 +103,16 @@ public class Database {
         return new JSONObject();
     }
 
+
     public JSONObject findBank(JSONObject query){
         return findOne("banks", query);
     }
 
-    public JSONObject findPixKeyPublic(JSONObject query){
-        return findOne("pixKeys", query);
-    }
 
-    public JSONObject findAccountByNumber(String number){
-        JSONObject query = new JSONObject();
-        query.put("number", number);
+    public JSONObject findPublicAccountInfos(JSONObject query){
         return findOne("publicAccountInfos", query);
     }
+
 
     public JSONObject findCostumerByBank(String bankID, JSONObject query){
         JSONObject bankSearchQuery = new JSONObject();
@@ -120,12 +122,14 @@ public class Database {
         return findOne(query, costumers);
     }
 
+
     public void addBank(JSONObject bankToAdd){
         JSONArray banks = (JSONArray) this.db.get("banks");
         banks.add(bankToAdd);
         this.db.replace("banks", banks);
         writeFile(this.db);
     }
+
 
     public int numberOfCostumers(String bankID){
         JSONObject query = new JSONObject();
@@ -135,12 +139,14 @@ public class Database {
         return (int) bank.get("numberOfCostumers");
     }
 
+
     public void removeBank(JSONObject bankToRemove){
         JSONArray banks = (JSONArray) this.db.get("banks");
         banks.remove(bankToRemove);
         this.db.replace("banks", banks);
         writeFile(this.db);
     }
+
 
     public Response removeBank(String bankID){
         JSONObject bankSearchQuery = new JSONObject();
@@ -158,6 +164,7 @@ public class Database {
         return new Response("Banco exclúido com sucesso", true);
     }
 
+
     public void addCostumer(String bankID, JSONObject costumerToAdd){
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
@@ -174,6 +181,7 @@ public class Database {
         this.db.replace("banks", banks);
         writeFile(this.db);
     }
+
 
     public Response removeCostumer(String bankID, JSONObject costumerToRemove){
         JSONObject bankSearchQuery = new JSONObject();
@@ -202,12 +210,14 @@ public class Database {
         return new Response("Cliente exclúido com sucesso", true);
     }
 
+
     public void addPixKeyPublic(JSONObject pixKeyObject){
         JSONArray publicAccountInfos = (JSONArray) this.db.get("publicAccountInfos");
         publicAccountInfos.add(pixKeyObject);
         this.db.replace("publicAccountInfos", publicAccountInfos);
         writeFile(this.db);
     }
+
 
     public void removePixKeyPublic(JSONObject pixKeyToRemove){
         JSONArray publicAccountInfos = (JSONArray) this.db.get("publicAccountInfos");
@@ -216,6 +226,35 @@ public class Database {
         writeFile(this.db);
     }
 
+
+    public void addCollect(JSONObject query){
+        JSONArray collects = (JSONArray) this.db.get("collects");
+        collects.add(query);
+        this.db.replace("collects", collects);
+        writeFile(this.db);
+    }
+
+    public JSONObject findCollect(JSONObject query){
+        JSONArray collects = (JSONArray) this.db.get("collects");
+        return findOne("collects", query);
+    }
+
+
+    public void removeCollect(JSONObject query){
+        JSONArray collects = (JSONArray) this.db.get("collects");
+        collects.remove(query);
+        this.db.replace("collects", collects);
+        writeFile(this.db);
+    }
+
+
+    public JSONObject getCollectInfo(String collectID){
+        JSONObject query = new JSONObject();
+        query.put("id", collectID);
+        return findOne("collects", query);
+    }
+
+
     Bank generateBankObject(JSONObject query){
         String bankName = (String) query.get("name");
         String bankID = (String) query.get("id");
@@ -223,6 +262,7 @@ public class Database {
 
         return new Bank(bankName, bankID, costumers);
     }
+
 
     Costumer generateCostumerObject(JSONObject query){
         boolean hasCPF = query.containsKey("cpf");
