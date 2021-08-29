@@ -11,6 +11,11 @@ public class CostumerPersonal extends Costumer{
         this.cpf = cpf;
     }
 
+    public CostumerPersonal(String id, String name, String email, String password, String cpf, Account account, String phoneNumber, Andress andress) {
+        super(id, name, email, password, phoneNumber, account, andress);
+        this.cpf = cpf;
+    }
+
 
     public boolean verifyCPF(String CPF){
         if (CPF.equals("00000000000") ||

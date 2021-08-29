@@ -2,28 +2,40 @@ package bancoCentral.model;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
 public class Account {
-    private String id;
     private String bankID;
     private String number;
     private float balance;
     private String pixKey;
-    private JSONArray historic;
+    private String costumerID;
+    private JSONArray historic = new JSONArray();
     Database db = new Database();
 
     public Account(String bankID, String number, String pixKey) {
         this.bankID = bankID;
-        this.id =  UUID.randomUUID().toString();
         this.balance = 0;
+        this.number = number;
         this.pixKey = pixKey;
+    }
+
+    public Account(String bankID, String number, String pixKey, JSONArray historic) {
+        this.bankID = bankID;
+        this.balance = 0;
+        this.number = number;
+        this.pixKey = pixKey;
+        this.historic = historic;
+    }
+
+    public Account(String bankID, String number, float balance, String pixKey, JSONArray historic) {
+        this.bankID = bankID;
+        this.balance = 0;
+        this.number = number;
+        this.pixKey = pixKey;
+        this.historic = historic;
     }
 
 
@@ -37,13 +49,24 @@ public class Account {
         transaction.put("type", type);
         transaction.put("number", number);
 
-        if(pixKey.isEmpty()){
-            transaction.put("pixKey", pixKey);
-        }
+        transaction.put("pixKey", pixKey);
 
         int timestamp = LocalDateTime.now().getNano();
         transaction.put("timestamp", timestamp);
         this.historic.add(transaction);
+    }
+
+
+    private JSONObject generateAccountObject(){
+        JSONObject accountObject = new JSONObject();
+
+        accountObject.put("bankID", this.bankID);
+        accountObject.put("balance", this.balance);
+        accountObject.put("number", this.number);
+        accountObject.put("pixKey", this.pixKey);
+        accountObject.put("historic", this.historic);
+
+        return accountObject;
     }
 
 
@@ -61,53 +84,59 @@ public class Account {
 
 
     public Response deposit(float amount){
+        System.out.println("Realizando Deposito\n");
         if(amount <= 0){
             return new Response("O depósito precisa ser de um valor maior do que R$ 0.00", false);
         }
         this.balance += amount;
         addToHistoricSelfTransaction(amount, "Depósito");
+//        this.db.updateAccount(this.bankID, this.costumerID, generateAccountObject());
         return new Response("Depósito efetuado com sucesso", true);
     }
 
 
-    public void receiveTransfer(float amount, String pixKey, String bankID, String number){
+    public void receiveTransfer(float amount, String pixKey, String bankID, String number, String type){
         this.balance += amount;
-        if(pixKey.isEmpty()){
+        if(Objects.equals(type, "pixKey")){
             addToHistoric(amount, pixKey, number, bankID, "Transferência recebida");
         }else{
             addToHistoric(amount, pixKey, number, bankID, "Transferência PIX recebida");
         }
+        this.db.updateAccount(this.bankID, this.costumerID, generateAccountObject(), "Recebido");
         System.out.println(String.format("Transferencia recebida de %s\nValor: %f", pixKey, amount));
     }
 
 
     public Response transfer(float amount, String keyToSearch, String type){
+        System.out.println("Realizando transferencia\n");
         if(amount <= 0){
             return new Response("O depósito precisa ser de um valor maior do que R$ 0.00", false);
         }
 
         JSONObject query = new JSONObject();
         query.put(type, keyToSearch);
-        JSONObject accountInfo = db.findPublicAccountInfos(query);
+        JSONObject accountInfo = this.db.findPublicAccountInfos(query);
 
         if(accountInfo.isEmpty()){ return new Response(String.format("%s inválido!", type), false); }
 
         JSONObject bankQuery = new JSONObject();
         bankQuery.put("id", accountInfo.get("bankID"));
-        JSONObject bankObject = db.findBank(bankQuery);
+        JSONObject bankObject = this.db.findBank(bankQuery);
 
         if(bankObject.isEmpty()){ return new Response("Banco não encontrado", false); }
 
-        Bank bank = db.generateBankObject(bankObject);
-
+        Bank bank = this.db.generateBankObject(bankObject);
         Account accountToReceiveTransfer = bank.getAccount(keyToSearch, type);
-        accountToReceiveTransfer.receiveTransfer(amount, keyToSearch, this.bankID, this.number);
+        accountToReceiveTransfer.receiveTransfer(amount, this.pixKey, this.bankID, this.number, type);
+
         if(Objects.equals(type, "number")){
-            addToHistoric(amount, "", accountToReceiveTransfer.number, accountToReceiveTransfer.bankID, "Transferência enviada");
+            addToHistoric(amount, "", accountToReceiveTransfer.getNumber(), accountToReceiveTransfer.getBankID(), "Transferência enviada");
         }else{
-            addToHistoric(amount, accountToReceiveTransfer.pixKey, accountToReceiveTransfer.number, accountToReceiveTransfer.bankID, "Transferência PIX enviada");
+            addToHistoric(amount, accountToReceiveTransfer.getPixKey(), accountToReceiveTransfer.getNumber(), accountToReceiveTransfer.getBankID(), "Transferência PIX enviada");
         }
 
+        this.balance -= amount;
+        this.db.updateAccount(this.bankID, this.costumerID, generateAccountObject(), "enviado");
         return new Response("Depósito efetuado com sucesso", true);
     }
 
@@ -118,6 +147,8 @@ public class Account {
         }
         this.balance -= amount;
         addToHistoricSelfTransaction(amount, "Saque");
+
+//        this.db.updateAccount(this.bankID, this.costumerID, generateAccountObject());
         return new Response("Depósito efetuado com sucesso", true);
     }
 
@@ -130,7 +161,7 @@ public class Account {
         JSONObject query = new JSONObject();
         JSONObject acountInfoQuery = new JSONObject();
         acountInfoQuery.put("number", this.number);
-        JSONObject accountInfo = db.findPublicAccountInfos(acountInfoQuery);
+        JSONObject accountInfo = this.db.findPublicAccountInfos(acountInfoQuery);
         query.put("id", collectID);
         query.put("amount", amount);
         query.put("pix", this.pixKey);
@@ -138,14 +169,14 @@ public class Account {
         query.put("bankID", this.bankID);
         query.put("collector", accountInfo.get("costumerName").toString());
 
-        db.addCollect(query);
+        this.db.addCollect(query);
         return new Response(String.format("Cobrança gerada com sucesso, chave da cobrança: %s", collectID), true);
     }
 
 
     public Response payCollect(String collectID){
         JSONObject query = new JSONObject();
-        JSONObject collectFinded = db.findCollect(query);
+        JSONObject collectFinded = this.db.findCollect(query);
         if(collectFinded.isEmpty()){
             return new Response("Nenhuma cobranća com essa chave foi encontrada", false);
         }
@@ -157,6 +188,7 @@ public class Account {
 
         this.balance -= collectAmount;
 
+//        this.db.updateAccount(this.bankID, this.costumerID, generateAccountObject());
         return new Response("Pagamento realizado com sucesso!", true);
     }
 
@@ -188,5 +220,35 @@ public class Account {
 
     public void setPixKey(String pixKey) {
         this.pixKey = pixKey;
+    }
+
+
+    public String getBankID() {
+        return bankID;
+    }
+
+
+    public void setBankID(String bankID) {
+        this.bankID = bankID;
+    }
+
+
+    public String getCostumerID() {
+        return costumerID;
+    }
+
+
+    public void setCostumerID(String costumerID) {
+        this.costumerID = costumerID;
+    }
+
+
+    public JSONArray getHistoric() {
+        return historic;
+    }
+
+
+    public void setHistoric(JSONArray historic) {
+        this.historic = historic;
     }
 }

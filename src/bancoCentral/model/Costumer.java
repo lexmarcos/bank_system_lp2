@@ -3,7 +3,7 @@ package bancoCentral.model;
 import java.util.UUID;
 
 public class Costumer {
-    private String id = UUID.randomUUID().toString();
+    private String id;
     private String name;
     private String email;
     private String password;
@@ -12,6 +12,17 @@ public class Costumer {
     private Andress andress;
 
     public Costumer(String name, String email, String password, String phoneNumber, Account account, Andress andress) {
+        this.id = UUID.randomUUID().toString();
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.account = account;
+        this.andress = andress;
+    }
+
+    public Costumer(String id, String name, String email, String password, String phoneNumber, Account account, Andress andress) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
@@ -54,6 +65,15 @@ public class Costumer {
         return phoneNumber;
     }
 
+
+    public String getId() {
+        return id;
+    }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;

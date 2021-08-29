@@ -11,6 +11,11 @@ public class CostumerLegal extends Costumer  {
         this.cnpj = cnpj;
     }
 
+    public CostumerLegal(String id, String name, String email, String password, String cnpj, Account account, String phoneNumber, Andress andress) {
+        super(id, name, email, password, phoneNumber, account, andress);
+        this.cnpj = cnpj;
+    }
+
 
     public boolean verifyCNPJ(String CNPJ){
         if (CNPJ.equals("00000000000000") || CNPJ.equals("11111111111111") ||

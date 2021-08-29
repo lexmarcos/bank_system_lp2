@@ -1,16 +1,24 @@
 package bancoCentral.model;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Bank {
     private String name;
-    private String id = UUID.randomUUID().toString();
-    private ArrayList<Costumer> costumers;
+    private String id;
+    private ArrayList<Costumer> costumers = new ArrayList<Costumer>();
     private int numberOfCostumers;
     private final Database db = new Database();
 
+
+    public Bank(String name) {
+        this.name = name;
+        this.id = UUID.randomUUID().toString();
+        this.numberOfCostumers = 0;
+    }
 
     public Bank(String name, String id) {
         this.name = name;
@@ -19,7 +27,7 @@ public class Bank {
     }
 
 
-    public Bank(String name, String id, Object[] costumers) {
+    public Bank(String name, String id, JSONArray costumers) {
         this.numberOfCostumers = 0;
         this.name = name;
         this.id = id;
@@ -44,6 +52,48 @@ public class Bank {
     }
 
 
+    private JSONObject generateCostumerObject(
+            String name, String email,
+            String password,
+            String phoneNumber, String pixKey,
+            String cep, String street,
+            String number, String city,
+            String state,
+            Account account
+    ){
+        JSONObject costumerToAdd = new JSONObject();
+        JSONObject accountObject = new JSONObject();
+        costumerToAdd.put("name", name);
+        costumerToAdd.put("email", email);
+        costumerToAdd.put("password", password);
+        costumerToAdd.put("phoneNumber", phoneNumber);
+        costumerToAdd.put("pixKey", pixKey);
+        costumerToAdd.put("cep", cep);
+        costumerToAdd.put("street", street);
+        costumerToAdd.put("number", number);
+        costumerToAdd.put("city", city);
+        costumerToAdd.put("state", state);
+        accountObject.put("balance", account.getBalance());
+        accountObject.put("number", account.getNumber());
+        accountObject.put("bankID", account.getBankID());
+        accountObject.put("pixKey", account.getPixKey());
+        accountObject.put("historic", new JSONArray());
+        costumerToAdd.put("account", accountObject);
+        return costumerToAdd;
+    }
+
+
+    private JSONObject generatePublicInfo(String name, String pixKey, String number){
+        JSONObject publicInfo = new JSONObject();
+        publicInfo.put("name", name);
+        publicInfo.put("pixKey", pixKey);
+        publicInfo.put("number", number);
+        publicInfo.put("bankID", this.id);
+
+        return publicInfo;
+    }
+
+
     public Response addCostumerPersonal(
             String name, String email,
             String password, String cpf,
@@ -54,29 +104,25 @@ public class Bank {
     ){
         this.numberOfCostumers += 1;
         String accountNumber = String.format("%d", 10000 + numberOfCostumers);
+
         Account account = new Account(this.id, accountNumber, pixKey);
         Andress andress = new Andress(cep, street, number, state);
 
         CostumerPersonal personal = new CostumerPersonal(name, email, password, cpf, account, phoneNumber, andress);
-        if(personal.verifyCPF(cpf)){
+        account.setCostumerID(personal.getId());
+        personal.setAccount(account);
+
+        if(!personal.verifyCPF(cpf)){
             return new Response("CPF inválido", false);
-        };
+        }
 
         costumers.add(personal);
-        JSONObject costumerToAdd = new JSONObject();
-        costumerToAdd.put("name", name);
-        costumerToAdd.put("email", email);
-        costumerToAdd.put("password", password);
+        JSONObject costumerToAdd = generateCostumerObject(name, email, password, phoneNumber, pixKey, cep, street, number, city, state, account);
         costumerToAdd.put("cpf", cpf);
-        costumerToAdd.put("phoneNumber", phoneNumber);
-        costumerToAdd.put("pixKey", pixKey);
-        costumerToAdd.put("cep", cep);
-        costumerToAdd.put("street", street);
-        costumerToAdd.put("number", number);
-        costumerToAdd.put("city", city);
-        costumerToAdd.put("state", state);
-
+        costumerToAdd.put("id", personal.getId());
+        db.addPublicAccountInfo(generatePublicInfo(name, pixKey, number));
         db.addCostumer(this.id, costumerToAdd);
+
 
         return new Response("Usuário adicionado com sucesso", true);
     }
@@ -92,28 +138,22 @@ public class Bank {
     ){
         this.numberOfCostumers += 1;
         String accountNumber = String.format("%d", 10000 + numberOfCostumers);
-        Account account = new Account(this.id, accountNumber, pixKey);
         Andress andress = new Andress(cep, street, number, state);
-
+        Account account = new Account(this.id, accountNumber, pixKey);
         CostumerLegal costumer = new CostumerLegal(name, email, password, cnpj, account, phoneNumber, andress);
+        account.setCostumerID(costumer.getId());
+        costumer.setAccount(account);
+
         if(costumer.verifyCNPJ(cnpj)){
             return new Response("CPF inválido", false);
         };
 
         costumers.add(costumer);
-        JSONObject costumerToAdd = new JSONObject();
-        costumerToAdd.put("name", name);
-        costumerToAdd.put("email", email);
-        costumerToAdd.put("password", password);
-        costumerToAdd.put("cpf", cnpj);
-        costumerToAdd.put("phoneNumber", phoneNumber);
-        costumerToAdd.put("pixKey", pixKey);
-        costumerToAdd.put("cep", cep);
-        costumerToAdd.put("street", street);
-        costumerToAdd.put("number", number);
-        costumerToAdd.put("city", city);
-        costumerToAdd.put("state", state);
+        JSONObject costumerToAdd = generateCostumerObject(name, email, password, phoneNumber, pixKey, cep, street, number, city, state, account);
+        costumerToAdd.put("cnpj", cnpj);
+        costumerToAdd.put("id", costumer.getId());
 
+        db.addPublicAccountInfo(generatePublicInfo(name, pixKey, number));
         db.addCostumer(this.id, costumerToAdd);
 
         return new Response("Usuário adicionado com sucesso", true);
@@ -145,18 +185,20 @@ public class Bank {
 
 
     public Costumer findCostumer(JSONObject query){
-        return db.generateCostumerObject(db.findCostumerByBank(this.id, query));
+        JSONObject costumer =  db.findCostumerByBank(this.id, query);
+        System.out.println(costumer.toJSONString());
+        return db.generateCostumerObject(costumer);
     }
 
 
     public Account getAccount(String pixOrNumber, String key){
-        JSONObject pixQuery = new JSONObject();
-        pixQuery.put(key, pixOrNumber);
-        JSONObject pixKeyObject = db.findPublicAccountInfos(pixQuery);
-        if(pixKeyObject.isEmpty()){ return new Account("NULL", "NULL", "NULL");}
-
-        Costumer costumerToReceiveTransfer = findCostumer(new JSONObject(pixQuery));
-        return costumerToReceiveTransfer.getAccount();
+        for(Costumer c: costumers){
+            if(Objects.equals(c.getAccount().getPixKey(), pixOrNumber)){
+                System.out.println(c.getName());
+                return c.getAccount();
+            }
+        }
+        return new Account("NULL","NULL","NULL");
     };
 
 
