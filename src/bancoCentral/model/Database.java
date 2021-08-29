@@ -5,6 +5,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.util.Objects;
 import java.util.Set;
 
 public class Database {
@@ -83,9 +84,6 @@ public class Database {
     private JSONObject findOne(String key, JSONObject query){
         this.db = readFile();
         JSONArray data = (JSONArray) db.get(key);
-        if(key.equals("publicAccountInfos")){
-            System.out.println(data.toJSONString());
-        }
         return getJsonObject(query, data);
     }
 
@@ -108,6 +106,9 @@ public class Database {
             for (Object o : allKeysArray) {
                 if (!currentObject.containsKey(o)) return new JSONObject();
                 if (currentObject.get(o).hashCode() != query.get(o).hashCode()) {
+                    break;
+                }
+                if(keyMatch == allKeysArray.length){
                     break;
                 }
                 keyMatch++;
@@ -134,6 +135,7 @@ public class Database {
 
 
     public JSONObject findCostumerByBank(String bankID, JSONObject query){
+
         this.db = readFile();
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
@@ -284,6 +286,19 @@ public class Database {
     }
 
 
+    public void updateCollect(JSONObject query){
+        this.db = readFile();
+        JSONArray collects = (JSONArray) this.db.get("collects");
+        JSONObject collectToUpdateQuery = new JSONObject();
+        collectToUpdateQuery.put("id", query.get("id").toString());
+        JSONObject collectToUpdate = findCollect(collectToUpdateQuery);
+        collects.remove(collectToUpdate);
+        collects.add(query);
+        this.db.replace("collects", collects);
+        writeFile(this.db);
+    }
+
+
     public JSONObject getCollectInfo(String collectID){
         this.db = readFile();
         JSONObject query = new JSONObject();
@@ -292,7 +307,7 @@ public class Database {
     }
 
 
-    public void updateAccount(String bankID, String costumerID, JSONObject query, String type){
+    public void updateAccount(String bankID, String costumerID, JSONObject query){
         this.db = readFile();
         JSONObject bankQuery = new JSONObject();
         bankQuery.put("id", bankID);
@@ -323,12 +338,12 @@ public class Database {
         String bankName = (String) query.get("name");
         String bankID = (String) query.get("id");
         JSONArray costumers = (JSONArray) query.get("costumers");
-
         return new Bank(bankName, bankID, costumers);
     }
 
 
     Costumer generateCostumerObject(JSONObject query){
+        System.out.println("costumer encontrado: " + query);
         this.db = readFile();
         boolean hasCPF = query.containsKey("cpf");
         if(hasCPF){
@@ -339,6 +354,7 @@ public class Database {
             float balance = Float.parseFloat(balanceStr);
 
             Account account = new Account(accountObject.get("bankID").toString(), accountNumber, balance, accountObject.get("pixKey").toString(), historic);
+            System.out.println("Balance: " + account.getBalance());
             Andress andress = new Andress(query.get("cep").toString(), query.get("street").toString(), query.get("number").toString(), query.get("state").toString());
             account.setCostumerID(query.get("id").toString());
 
@@ -350,6 +366,7 @@ public class Database {
                     query.get("cpf").toString(),account, query.get("phoneNumber").toString(), andress
             );
         }
+
 
         JSONObject accountObject = (JSONObject) query.get("account");
         String accountNumber = accountObject.get("number").toString();

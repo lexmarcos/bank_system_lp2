@@ -21,6 +21,11 @@ public class BankSystem {
         Response deposit = henry.deposit(1000.45f);
         Response transfer = henry.transfer(500.40f, marcola.getPixKey(), "pixKey");
 
+        Response collect = marcola.collect(450);
+        String IDCollect = collect.getMessage().split(":")[1].trim();
+        henry.payCollect(IDCollect);
+        System.out.println(collect.getMessage());
+
         System.out.println(deposit.getMessage());
         System.out.println(transfer.getMessage());
     }

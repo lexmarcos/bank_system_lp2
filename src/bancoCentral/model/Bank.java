@@ -90,12 +90,13 @@ public class Bank {
     }
 
 
-    private JSONObject generatePublicInfo(String name, String pixKey, String number){
+    private JSONObject generatePublicInfo(String name, String pixKey, String number, String id){
         JSONObject publicInfo = new JSONObject();
         publicInfo.put("name", name);
         publicInfo.put("pixKey", pixKey);
         publicInfo.put("number", number);
         publicInfo.put("bankID", this.id);
+        publicInfo.put("id", id);
 
         return publicInfo;
     }
@@ -127,7 +128,7 @@ public class Bank {
         JSONObject costumerToAdd = generateCostumerObject(name, email, password, phoneNumber, pixKey, cep, street, number, city, state, account);
         costumerToAdd.put("cpf", cpf);
         costumerToAdd.put("id", personal.getId());
-        db.addPublicAccountInfo(generatePublicInfo(name, pixKey, number));
+        db.addPublicAccountInfo(generatePublicInfo(name, pixKey, accountNumber, personal.getId()));
         db.addCostumer(this.id, costumerToAdd);
 
 
@@ -160,7 +161,7 @@ public class Bank {
         costumerToAdd.put("cnpj", cnpj);
         costumerToAdd.put("id", costumer.getId());
 
-        db.addPublicAccountInfo(generatePublicInfo(name, pixKey, number));
+        db.addPublicAccountInfo(generatePublicInfo(name, pixKey, account.getNumber(), costumer.getId()));
         db.addCostumer(this.id, costumerToAdd);
 
         return new Response("Usuário adicionado com sucesso", true);
@@ -193,19 +194,22 @@ public class Bank {
 
     public Costumer findCostumer(JSONObject query){
         JSONObject costumer =  db.findCostumerByBank(this.id, query);
-        System.out.println(costumer.toJSONString());
         return db.generateCostumerObject(costumer);
     }
 
 
     public Account getAccount(String pixOrNumber, String key){
-        for(Costumer c: costumers){
-            if(Objects.equals(c.getAccount().getPixKey(), pixOrNumber)){
-                System.out.println(c.getName());
-                return c.getAccount();
-            }
-        }
-        return new Account("NULL","NULL","NULL");
+        JSONObject pixQuery = new JSONObject();
+        pixQuery.put(key, pixOrNumber);
+        pixQuery.put("bankID", this.id);
+
+        JSONObject pixKeyObject = db.findPublicAccountInfos(pixQuery);
+        if(pixKeyObject.isEmpty()){ return new Account("NULL", "NULL", "NULL");}
+
+        JSONObject costumerToSearchQuery = new JSONObject();
+        costumerToSearchQuery.put("id", pixKeyObject.get("id"));
+        Costumer costumerToReceiveTransfer = findCostumer(costumerToSearchQuery);
+        return costumerToReceiveTransfer.getAccount();
     };
 
 
