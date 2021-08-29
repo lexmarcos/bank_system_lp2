@@ -18,6 +18,13 @@ public class Bank {
         this.name = name;
         this.id = UUID.randomUUID().toString();
         this.numberOfCostumers = 0;
+
+        JSONObject bankObject =  new JSONObject();
+        bankObject.put("id", this.id);
+        bankObject.put("name", this.name);
+        bankObject.put("costumers", new JSONArray());
+
+        db.addBank(bankObject);
     }
 
     public Bank(String name, String id) {
