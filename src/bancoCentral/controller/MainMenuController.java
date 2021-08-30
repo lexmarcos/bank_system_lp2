@@ -50,7 +50,7 @@ public class MainMenuController {
     }
 
     public void goToBalanceScreen(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/bancoCentral/view/BalanceView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/bancoCentral/view/ExtractView.fxml"));
         Stage window = (Stage) btnDeposit.getScene().getWindow();
         window.setScene(new Scene(root));
     }

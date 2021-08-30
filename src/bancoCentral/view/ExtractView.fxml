@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bancoCentral.controller.DepositSuccessController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bancoCentral.controller.ExtractController">
    <top>
       <BorderPane prefHeight="75.0" prefWidth="200.0" style="-fx-background-color: #9400d3;" BorderPane.alignment="CENTER">
          <center>
@@ -28,7 +28,7 @@
                         <Font name="System Bold" size="24.0" />
                      </font>
                   </Label>
-                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+                  <TextArea fx:id="extractValueInput" prefHeight="200.0" prefWidth="200.0" />
                   <Button fx:id="btnGoToMenu" mnemonicParsing="false" onAction="#goToMainScreen" text="Voltar">
                      <VBox.margin>
                         <Insets top="40.0" />
