@@ -42,6 +42,7 @@ public class Database {
             dbJson.put("banks", new JSONArray());
             dbJson.put("publicAccountInfos", new JSONArray());
             dbJson.put("collects", new JSONArray());
+            dbJson.put("costumerLogged", new JSONObject());
             myDB.write(dbJson.toString());
             myDB.close();
             this.db = dbJson;
@@ -50,6 +51,8 @@ public class Database {
         }
 
     }
+
+
     private JSONObject readFile(){
         JSONParser parser = new JSONParser();
         try {
@@ -81,7 +84,7 @@ public class Database {
     }
 
 
-    private JSONObject findOne(String key, JSONObject query){
+    public JSONObject findOne(String key, JSONObject query){
         this.db = readFile();
         JSONArray data = (JSONArray) db.get(key);
         return getJsonObject(query, data);
@@ -135,7 +138,6 @@ public class Database {
 
 
     public JSONObject findCostumerByBank(String bankID, JSONObject query){
-
         this.db = readFile();
         JSONObject bankSearchQuery = new JSONObject();
         bankSearchQuery.put("id", bankID);
@@ -170,6 +172,13 @@ public class Database {
         banks.remove(bankToRemove);
         this.db.replace("banks", banks);
         writeFile(this.db);
+    }
+
+
+    public JSONObject getCostumerInfoByString(String email){
+        JSONObject query = new JSONObject();
+        query.put("email", email);
+        return findPublicAccountInfos(query);
     }
 
 
@@ -270,10 +279,29 @@ public class Database {
         writeFile(this.db);
     }
 
+
     public JSONObject findCollect(JSONObject query){
         this.db = readFile();
         JSONArray collects = (JSONArray) this.db.get("collects");
         return findOne("collects", query);
+    }
+
+    public JSONObject findLastCollectOfCostumer(String pixKey){
+        this.db = readFile();
+        JSONArray collects = (JSONArray) this.db.get("collects");
+        JSONObject lastCollect = (JSONObject) collects.get(0);
+
+        for(int i = 1; i < collects.size(); i++){
+            JSONObject currentCollect = (JSONObject) collects.get(i);
+            int lastTimestamp = Integer.parseInt(lastCollect.get("timestamp").toString());
+            int CurrentTimestamp = Integer.parseInt(currentCollect.get("timestamp").toString());
+            if(Objects.equals(currentCollect.get("pixKey").toString(), pixKey)){
+                if(lastTimestamp > CurrentTimestamp){
+                    lastCollect = currentCollect;
+                }
+            }
+        }
+        return lastCollect;
     }
 
 
@@ -333,7 +361,7 @@ public class Database {
     }
 
 
-    Bank generateBankObject(JSONObject query){
+    public Bank generateBankObject(JSONObject query){
         this.db = readFile();
         String bankName = (String) query.get("name");
         String bankID = (String) query.get("id");
@@ -342,8 +370,7 @@ public class Database {
     }
 
 
-    Costumer generateCostumerObject(JSONObject query){
-        System.out.println("costumer encontrado: " + query);
+    public Costumer generateCostumerObject(JSONObject query){
         this.db = readFile();
         boolean hasCPF = query.containsKey("cpf");
         if(hasCPF){
@@ -382,6 +409,55 @@ public class Database {
                 query.get("password").toString(),
                 query.get("cnpj").toString(),account, query.get("phoneNumber").toString(), andress
         );
+    }
+
+
+    public Costumer getCostumerLogged(){
+        this.db = readFile();
+        JSONObject costumerLogged = (JSONObject) this.db.get("costumerLogged");
+        JSONObject bankQuery = new JSONObject();
+        bankQuery.put("bankLoginId", costumerLogged.get("bankLoginId"));
+        JSONObject bankObject = findBank(bankQuery);
+
+
+
+        JSONObject query = new JSONObject();
+        query.put("email", costumerLogged.get("email").toString());
+        query.put("id", costumerLogged.get("id").toString());
+        JSONArray costumers = (JSONArray) bankObject.get("costumers");
+        JSONObject costumerObject = findOne(query, costumers);
+
+        return generateCostumerObject(costumerObject);
+    }
+
+
+    public Costumer loginCostumer(String bankLoginId, String email, String password){
+        this.db = readFile();
+        JSONObject bankQuery = new JSONObject();
+        bankQuery.put("bankLoginId",bankLoginId);
+        JSONObject bankObject = findBank(bankQuery);
+
+
+        JSONObject query = new JSONObject();
+        query.put("email", email);
+        query.put("password", password);
+        JSONArray costumers = (JSONArray) bankObject.get("costumers");
+
+        JSONObject costumerObject = findOne(query, costumers);
+
+        JSONObject costumerLogged = new JSONObject();
+        costumerLogged.put("id", costumerObject.get("id").toString());
+        costumerLogged.put("email", costumerObject.get("email").toString());
+        costumerLogged.put("name", costumerObject.get("name").toString());
+        costumerLogged.put("bankLoginId", bankLoginId);
+
+        this.db.replace("costumerLogged", costumerLogged);
+        writeFile(this.db);
+        return generateCostumerObject(costumerObject);
+    }
+
+    public Costumer logout(){
+        return new Costumer();
     }
     
 }

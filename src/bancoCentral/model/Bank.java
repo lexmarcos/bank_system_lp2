@@ -11,18 +11,24 @@ public class Bank {
     private String id;
     private ArrayList<Costumer> costumers = new ArrayList<Costumer>();
     private int numberOfCostumers;
+    private String bankLoginID;
     private final Database db = new Database();
 
 
     public Bank(String name) {
+        JSONArray banks = (JSONArray) db.getDb().get("banks");
+
         this.name = name;
         this.id = UUID.randomUUID().toString();
         this.numberOfCostumers = 0;
+        this.bankLoginID = Integer.toString(banks.size()+1);
+
 
         JSONObject bankObject =  new JSONObject();
         bankObject.put("id", this.id);
         bankObject.put("name", this.name);
         bankObject.put("costumers", new JSONArray());
+        bankObject.put("bankLoginId", this.bankLoginID);
 
         db.addBank(bankObject);
     }
@@ -38,7 +44,9 @@ public class Bank {
         this.numberOfCostumers = 0;
         this.name = name;
         this.id = id;
+        if(costumers == null) return;
         for (Object costumer : costumers) {
+
             JSONObject currentCostumer = (JSONObject) costumer;
             boolean hasCPF = currentCostumer.containsKey("cpf");
             if (hasCPF) {
@@ -238,5 +246,13 @@ public class Bank {
 
     public void setCostumers(ArrayList<Costumer> costumers) {
         this.costumers = costumers;
+    }
+
+    public String getBankLoginID() {
+        return bankLoginID;
+    }
+
+    public void setBankLoginID(String bankLoginID) {
+        this.bankLoginID = bankLoginID;
     }
 }

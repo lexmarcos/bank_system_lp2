@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bancoCentral.controller.MainMenuController">
+   <top>
+      <BorderPane prefHeight="75.0" prefWidth="200.0" style="-fx-background-color: #9400d3;" BorderPane.alignment="CENTER">
+         <center>
+            <Label text="Selecione uma ação" textFill="WHITE" BorderPane.alignment="CENTER" />
+         </center>
+      </BorderPane>
+   </top>
+   <center>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnDeposit" onAction="#goToDepositScreen" layoutX="192.0" layoutY="92.0" mnemonicParsing="false"  prefHeight="40.0" prefWidth="100.0" text="Depositar" />
+            <Button fx:id="btnWithdraw" onAction="#goToWithdrawScreen" layoutX="192.0" layoutY="143.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Sacar" />
+            <Button fx:id="btnTransfer" onAction="#goToTransferScreen" layoutX="192.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Transferir" />
+            <Button fx:id="btnPayCollect" onAction="#goToPayCollect" layoutX="309.0" layoutY="143.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Pagar Cobrança" />
+            <Button fx:id="btnCollect" onAction="#goToCollect" layoutX="309.0" layoutY="92.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Cobrar" />
+            <Button fx:id="btnExtract" layoutX="309.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Extrato" />
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>

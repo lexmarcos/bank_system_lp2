@@ -31,6 +31,16 @@ public class Costumer {
         this.andress = andress;
     }
 
+    public Costumer() {
+        this.id = null;
+        this.name = null;
+        this.email = null;
+        this.password = null;
+        this.phoneNumber = null;
+        this.account = null;
+        this.andress = null;
+    }
+
     public String getName() {
         return name;
     }

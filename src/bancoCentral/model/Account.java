@@ -57,6 +57,11 @@ public class Account {
     }
 
 
+    public JSONObject getLastTransaction(){
+        return (JSONObject) this.historic.get(this.historic.size() - 1);
+    }
+
+
     private JSONObject generateAccountObject(){
         JSONObject accountObject = new JSONObject();
 
@@ -111,6 +116,8 @@ public class Account {
         System.out.println("Realizando transferencia\n");
         if(amount <= 0){
             return new Response("O depósito precisa ser de um valor maior do que R$ 0.00", false);
+        }else if(this.balance < amount){
+            return new Response("Você não tem saldo o suficiente", false);
         }
 
         JSONObject query = new JSONObject();
@@ -144,6 +151,8 @@ public class Account {
     public Response withdraw(float amount){
         if(amount <= 0){
             return new Response("O saque precisa ser de um valor maior do que R$ 0.00", false);
+        }else if(this.balance < amount){
+            return new Response("Você não tem saldo o suficiente", false);
         }
         this.balance -= amount;
         addToHistoricSelfTransaction(amount, "Saque");
@@ -171,6 +180,8 @@ public class Account {
         query.put("bankID", this.bankID);
         query.put("isPaid", false);
         query.put("collector", accountInfo.get("name").toString());
+        int timestamp = LocalDateTime.now().getNano();
+        query.put("timestamp", timestamp);
 
         this.db.addCollect(query);
         return new Response(String.format("Cobrança gerada com sucesso, chave da cobrança: %s", collectID), true);
@@ -233,7 +244,7 @@ public class Account {
         this.db.updateAccount(this.bankID, this.costumerID, generateAccountObject());
 
         Account accountToReceiveTransfer = bank.getAccount(collectFinded.get("number").toString(), "number");
-        System.out.println(accountToReceiveTransfer.getBalance());
+
         accountToReceiveTransfer.receiveCollect(collectID);
         return new Response("Pagamento realizado com sucesso!", true);
     }
