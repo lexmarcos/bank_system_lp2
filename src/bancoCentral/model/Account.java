@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Account {
+public class Account implements Displayer{
     private String bankID;
     private String number;
     private float balance;
@@ -36,6 +36,20 @@ public class Account {
         this.number = number;
         this.pixKey = pixKey;
         this.historic = historic;
+    }
+
+    @Override
+    public JSONObject displayData(){
+        JSONObject allDataOfClass = new JSONObject();
+        allDataOfClass.put("bankID", this.bankID);
+        allDataOfClass.put("balance", this.balance);
+        allDataOfClass.put("number", this.number);
+        allDataOfClass.put("pixKey", this.pixKey);
+        allDataOfClass.put("historic", this.historic);
+
+        System.out.println(allDataOfClass.toJSONString());
+
+        return allDataOfClass;
     }
 
 

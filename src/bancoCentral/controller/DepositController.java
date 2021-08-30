@@ -47,7 +47,6 @@ public class DepositController {
         Parent root = FXMLLoader.load(getClass().getResource("/bancoCentral/view/DepositSucessView.fxml"));
         Stage window = (Stage) btnGoToSucess.getScene().getWindow();
         window.setScene(new Scene(root));
-        System.out.println("Testee");
     }
 
     public void goToMainScreen(ActionEvent actionEvent) throws IOException {

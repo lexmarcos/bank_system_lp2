@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Bank {
+public class Bank implements Displayer{
     private String name;
     private String id;
     private ArrayList<Costumer> costumers = new ArrayList<Costumer>();
@@ -23,12 +23,7 @@ public class Bank {
         this.numberOfCostumers = 0;
         this.bankLoginID = Integer.toString(banks.size()+1);
 
-
-        JSONObject bankObject =  new JSONObject();
-        bankObject.put("id", this.id);
-        bankObject.put("name", this.name);
-        bankObject.put("costumers", new JSONArray());
-        bankObject.put("bankLoginId", this.bankLoginID);
+        JSONObject bankObject = displayData();
 
         db.addBank(bankObject);
     }
@@ -56,6 +51,21 @@ public class Bank {
             addCostumerLegal(db.generateCostumerObject(currentCostumer));
         }
     }
+
+
+    @Override
+    public JSONObject displayData() {
+        JSONObject allDataOfClass = new JSONObject();
+        allDataOfClass.put("id", this.id);
+        allDataOfClass.put("name", this.name);
+        allDataOfClass.put("costumers", new JSONArray());
+        allDataOfClass.put("bankLoginId", this.bankLoginID);
+
+        System.out.println(allDataOfClass.toJSONString());
+
+        return allDataOfClass;
+    }
+
 
     public void addCostumerPersonal(Costumer costumer){
         costumers.add(costumer);

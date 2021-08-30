@@ -49,6 +49,5 @@ public class LoginController {
         Parent root = FXMLLoader.load(getClass().getResource("/bancoCentral/view/MainMenuView.fxml"));
         Stage window = (Stage) btnLogin.getScene().getWindow();
         window.setScene(new Scene(root));
-        System.out.println("Testee");
     }
 }

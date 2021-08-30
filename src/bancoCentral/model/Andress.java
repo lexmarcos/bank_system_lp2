@@ -1,6 +1,8 @@
 package bancoCentral.model;
 
-public class Andress {
+import org.json.simple.JSONObject;
+
+public class Andress implements Displayer {
     private String cep;
     private String street;
     private String number;
@@ -20,6 +22,20 @@ public class Andress {
             return new Response("CEP inválido", false);
         }
         return new Response("CEP válido", true);
+    }
+
+
+    @Override
+    public JSONObject displayData() {
+        JSONObject allDataOfClass = new JSONObject();
+        allDataOfClass.put("cep", this.cep);
+        allDataOfClass.put("street", this.street);
+        allDataOfClass.put("number", this.number);
+        allDataOfClass.put("state", this.state);
+
+        System.out.println(allDataOfClass.toJSONString());
+
+        return allDataOfClass;
     }
 
 

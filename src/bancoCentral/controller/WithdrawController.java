@@ -50,6 +50,5 @@ public class WithdrawController {
         Parent root = FXMLLoader.load(getClass().getResource("/bancoCentral/view/WithdrawSucessView.fxml"));
         Stage window = (Stage) btnGoToSuccess.getScene().getWindow();
         window.setScene(new Scene(root));
-        System.out.println("Testee");
     }
 }

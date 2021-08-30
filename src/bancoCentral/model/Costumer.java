@@ -1,8 +1,10 @@
 package bancoCentral.model;
 
+import org.json.simple.JSONObject;
+
 import java.util.UUID;
 
-public class Costumer {
+public class Costumer implements Displayer {
     private String id;
     private String name;
     private String email;
@@ -40,6 +42,24 @@ public class Costumer {
         this.account = null;
         this.andress = null;
     }
+
+
+    @Override
+    public JSONObject displayData() {
+        JSONObject allDataOfClass = new JSONObject();
+        allDataOfClass.put("id", this.id);
+        allDataOfClass.put("name", this.name);
+        allDataOfClass.put("email", this.email);
+        allDataOfClass.put("password", this.password);
+        allDataOfClass.put("phoneNumber", this.phoneNumber);
+        allDataOfClass.put("account", this.account);
+        allDataOfClass.put("andress", this.andress);
+
+        System.out.println(allDataOfClass.toJSONString());
+
+        return allDataOfClass;
+    }
+
 
     public String getName() {
         return name;
