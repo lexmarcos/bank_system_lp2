@@ -21,7 +21,7 @@
             <Button fx:id="btnTransfer" onAction="#goToTransferScreen" layoutX="192.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Transferir" />
             <Button fx:id="btnPayCollect" onAction="#goToPayCollect" layoutX="309.0" layoutY="143.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Pagar Cobrança" />
             <Button fx:id="btnCollect" onAction="#goToCollect" layoutX="309.0" layoutY="92.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Cobrar" />
-            <Button fx:id="btnExtract" layoutX="309.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Extrato" />
+            <Button fx:id="btnExtract" onAction="#goToBalanceScreen" layoutX="309.0" layoutY="194.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" text="Ver saldo" />
          </children>
       </AnchorPane>
    </center>

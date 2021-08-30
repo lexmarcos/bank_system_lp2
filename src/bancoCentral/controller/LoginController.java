@@ -40,8 +40,7 @@ public class LoginController {
     @FXML
     public void login(ActionEvent actionEvent) throws IOException {
         System.out.println(String.format("%s\n%s\n%s\n", bankLoginID.getText(), emailInput.getText(), passwordInput.getText()));
-//        costumerLogged = loginDB(bankLoginID.getText(), emailInput.getText(), passwordInput.getText());
-        costumerLogged = loginDB("1", "henrymedeiros@hotmail.com",  "hhsyehbd637");
+        costumerLogged = loginDB(bankLoginID.getText(), emailInput.getText(), passwordInput.getText());
         goToMainMenu(actionEvent);
     }
 
